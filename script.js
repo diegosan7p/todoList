@@ -9,11 +9,7 @@ const listUsers = async () => {
 
   let tableBody = ``
   users.forEach((user) => {
-    tableBody+= `<tr>
-    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.id}</a></td>
-    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.name}</a></td>
-    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.username}</a></td>
-    </tr>`
+    tableBody+= getRowUser(user)
   })
   document.getElementById("tableBody_Users").innerHTML = tableBody
 }
@@ -25,7 +21,7 @@ const listTodos = async () => {
 
   let tableTodo = ``
   todos.forEach((todo) => {
-    tableTodo+= getRow(todo)
+    tableTodo+= getRowTodo(todo)
   })
   document.getElementById("tableTodos_Todos").innerHTML = tableTodo
   console.log(todos);
@@ -48,10 +44,18 @@ const postTodos = async () => {
   })
   const postTodos = await response.json();
   console.log(postTodos);
-  addRow(getRow(postTodos))
+  addRow(getRowTodo(postTodos))
 }
 
-function getRow(todo) {
+function getRowUser(user) {
+  return `<tr>
+    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.id}</a></td>
+    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.name}</a></td>
+    <td class="centered" onclick="setId(${user.id})"><a href="./todoList.html">${user.username}</a></td>
+    </tr>`
+}
+
+function getRowTodo(todo) {
   return `<tr>
   <td class="centered">${todo.userId}</td>
   <td class="centered">${todo.title}</td>
