@@ -1,50 +1,57 @@
+const nodeTableTodos = document.getElementById("tableTodos_Todos");
+const nodeTableUsers = document.getElementById("tableBody_Users");
+
 window.addEventListener("load", function () {
-  listUsers()
-  listTodos()
+  nodeTableUsers != null ? listUsers() :
+    listTodos()
 });
 
-const listUsers = async () => {
-  const response = await fetch('https://jsonplaceholder.typicode.com/users')
-  const users = await response.json();
+const getUsers = new Promise((res, rej) => {
+  fetch('https://jsonplaceholder.typicode.com/users')
+    .then(users => res(users.json()))
+    .catch(e => rej("Ocorreu um erro ao buscar os usuários"))
+})
 
-  let tableBody = ``
-  users.forEach((user) => {
-    tableBody+= getRowUser(user)
-  })
-  document.getElementById("tableBody_Users").innerHTML = tableBody
-}
+const getUserData = async id => await new Promise((res, rej) => {
+  fetch(`https://jsonplaceholder.typicode.com/todos?userId=${id}`)
+    .then(user => res(user.json()))
+    .catch(e => rej("Ocorreu um erro ao buscar os usuários"))
+})
+
+const listUsers = () => getUsers
+  .then(data => data.map(user => appendInnerHtml(getRowUser(user), nodeTableUsers)))
+  .catch(() => alert("Ocorreu um erro ao buscar os usuários!"))
 
 const listTodos = async () => {
-  var userid = sessionStorage.getItem('userid');
-  const response = await fetch(`https://jsonplaceholder.typicode.com/todos?userId=${userid}`)
-  const todos = await response.json();
-
-  let tableTodo = ``
-  todos.forEach((todo) => {
-    tableTodo+= getRowTodo(todo)
-  })
-  document.getElementById("tableTodos_Todos").innerHTML = tableTodo
-  console.log(todos);
+  var userId = sessionStorage.getItem('userid');
+  getUserData(userId)
+    .then(data => data.map(userData => appendInnerHtml(getRowTodo(userData), nodeTableTodos)))
+    .catch(() => console.log("Não foi possível buscar os dados desse usuário :("))
 }
 
-const postTodos = async () => {
-  var title = document.getElementById('title').value
-  var userid = sessionStorage.getItem('userid');
-  const response = await fetch('https://jsonplaceholder.typicode.com/todos', {
+const createTodo = async data => await new Promise((res, rej) => {
+  fetch('https://jsonplaceholder.typicode.com/todos', {
     method: 'POST',
     body: JSON.stringify({
-      userId: userid,
-      title: title,
+      userId: data.userid || 999,
+      title: data.title,
       completed: false
-      
     }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
     },
   })
-  const postTodos = await response.json();
-  console.log(postTodos);
-  addRow(getRowTodo(postTodos))
+    .then(todo => res(todo.json()))
+    .catch(() => alert("Não foi possível criar um novo TODO :("))
+})
+
+const handleNewTodo = async () => {
+  createTodo({
+    title: document.getElementById('title').value || "Untitled",
+    userid: sessionStorage.getItem('userid')
+  })
+    .then(todo => appendInnerHtml(getRowTodo(todo), nodeTableTodos))
+    .catch(() => alert("Não foi possivel inserir o novo TODO :("))
 }
 
 function getRowUser(user) {
@@ -64,12 +71,9 @@ function getRowTodo(todo) {
   </tr>`
 }
 
-function setId(userid) {
-  sessionStorage.setItem('userid', userid)
-}
+const setId = id => sessionStorage.setItem('userid', id)
 
-function addRow(row){
-  let object = document.getElementById("tableTodos_Todos")
-  let content = object.innerHTML
-  object.innerHTML = content + row
+const appendInnerHtml = (content, obj, order) => {
+  const oldData = obj.innerHTML;
+  order === 0 ? obj.innerHTML = content + oldData : obj.innerHTML = oldData + content
 }
