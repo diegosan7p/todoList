@@ -1,0 +1,23 @@
+body {
+  background: rgb(0, 0, 0);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(33, 37, 41, 1) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+.centered {
+  text-align: center;
+  vertical-align: middle;
+}
+
+a {
+  text-decoration: none;
+  color: rgb(255, 255, 255);
+}
+a:hover {
+  color: rgb(0, 195, 255);
+  
+}
